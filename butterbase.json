@@ -1,0 +1,27 @@
+{
+  "app_id": "app_02vcbf6ev0vp",
+  "name": "linalg-workbench",
+  "api_url": "https://api.butterbase.ai/v1/app_02vcbf6ev0vp",
+  "frontend_url": "https://linalg-workbench.butterbase.dev",
+  "functions": [
+    {
+      "name": "evaluate",
+      "source": "functions/evaluate.ts",
+      "url": "https://api.butterbase.ai/v1/app_02vcbf6ev0vp/fn/evaluate",
+      "trigger": {
+        "type": "http",
+        "method": "POST",
+        "path": "/evaluate",
+        "auth": "none"
+      },
+      "timeoutMs": 45000
+    }
+  ],
+  "cors": {
+    "allowed_origins": [
+      "http://localhost:5173",
+      "http://localhost:3000",
+      "https://linalg-workbench.butterbase.dev"
+    ]
+  }
+}

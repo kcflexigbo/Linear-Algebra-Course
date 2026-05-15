@@ -1,0 +1,13 @@
+# Build artifacts
+frontend/dist/
+frontend.zip
+__pycache__/
+*.pyc
+
+# Dependencies
+frontend/node_modules/
+
+# Env files with secrets
+*.env
+frontend/.env.local
+frontend/.env.*.local
