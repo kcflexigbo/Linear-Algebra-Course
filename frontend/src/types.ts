@@ -14,3 +14,17 @@ export type SageOutput =
   | { type: 'stream'; name: string; text: string }
   | { type: 'display'; data: Record<string, string> }
   | { type: 'error'; ename: string; evalue: string; traceback: string[] };
+
+export type TitleSource = 'pending' | 'ai' | 'user';
+
+export interface Calculation {
+  id: string;
+  user_id: string;
+  created_at: string;
+  title: string | null;
+  title_source: TitleSource;
+  code: string;
+  objects: WorkbenchObject[];
+  outputs: SageOutput[];
+  preview: string;
+}

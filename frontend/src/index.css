@@ -504,3 +504,46 @@ code {
 .modal-actions button[type="submit"] { background: var(--ink); color: var(--paper, #fdfaf2); border-color: var(--ink); }
 .modal-actions button:disabled { opacity: 0.5; cursor: not-allowed; }
 .modal .error { color: #a33; font-style: italic; }
+
+/* ── History modal ────────────────────────────────────────────── */
+.modal-history { max-width: 640px; width: 90%; }
+.modal-header {
+  display: flex; justify-content: space-between; align-items: baseline;
+  margin-bottom: 12px; gap: 8px;
+}
+.modal-header-actions { display: flex; gap: 6px; align-items: center; font-size: 13px; }
+.modal-header-actions button {
+  font-family: var(--serif); font-size: 13px;
+  background: none; border: 1px solid var(--rule);
+  padding: 3px 10px; cursor: pointer;
+}
+.modal-header-actions button:hover { border-color: var(--ink); }
+.history-list {
+  list-style: none; padding: 0; margin: 0;
+  max-height: 56vh; overflow-y: auto;
+}
+.history-entry {
+  display: flex; align-items: center; gap: 8px;
+  padding: 8px 4px; border-bottom: 1px solid var(--rule);
+}
+.history-entry-load {
+  flex: 1; text-align: left; background: none; border: none;
+  cursor: pointer; padding: 4px 0; font-family: inherit;
+  display: flex; flex-direction: column; gap: 2px;
+}
+.history-entry-load:hover { background: rgba(0,0,0,0.03); }
+.history-title { font-family: var(--serif); font-weight: 500; font-size: 15px; color: var(--ink); }
+.history-title-placeholder {
+  font-family: var(--mono); font-size: 13px; color: var(--ink-soft);
+  font-style: italic;
+}
+.history-meta { font-family: var(--serif); font-size: 12px; color: var(--ink-faint); font-style: italic; }
+.history-actions { display: inline-flex; gap: 4px; }
+.history-actions button {
+  background: none; border: 1px solid transparent; cursor: pointer;
+  padding: 2px 8px; font-size: 14px;
+}
+.history-actions button:hover { border-color: var(--rule); }
+.history-rename-form { flex: 1; display: flex; gap: 4px; align-items: center; }
+.history-rename-form input { flex: 1; padding: 4px 6px; font-family: var(--mono); font-size: 13px; border: 1px solid var(--rule); }
+.history-rename-form button { font-family: var(--serif); font-size: 13px; padding: 4px 10px; background: none; border: 1px solid var(--rule); cursor: pointer; }

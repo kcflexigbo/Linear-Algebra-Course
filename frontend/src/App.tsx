@@ -5,10 +5,11 @@ import { ObjectCard } from './components/ObjectCard';
 import { SnippetBar } from './components/SnippetBar';
 import { OutputPanel } from './components/OutputPanel';
 import { CodeEditor, type CodeEditorHandle } from './components/CodeEditor';
-import { runOnSage } from './api';
+import { runOnSage, saveHistory } from './api';
 import { useAuth } from './auth/AuthContext';
 import { LoginModal } from './auth/LoginModal';
-import type { ObjKind, SageOutput } from './types';
+import { HistoryModal } from './history/HistoryModal';
+import type { ObjKind, SageOutput, WorkbenchObject, Calculation } from './types';
 import 'katex/dist/katex.min.css';
 
 export default function App() {
@@ -16,12 +17,17 @@ export default function App() {
   const persist = useLocalWorkbench();
   const auth = useAuth();
   const [loginOpen, setLoginOpen] = useState(false);
+  const [historyOpen, setHistoryOpen] = useState(false);
   const [code, setCode] = useState('show(A.rref())');
   const [showPreamble, setShowPreamble] = useState(false);
   const [loading, setLoading] = useState(false);
   const [outputs, setOutputs] = useState<SageOutput[] | null>(null);
   const [evalError, setEvalError] = useState<string | null>(null);
   const [restored, setRestored] = useState(false);
+  const [lastEvaluatedState, setLastEvaluatedState] = useState<{
+    objects: WorkbenchObject[];
+    code: string;
+  } | null>(null);
   const editorRef = useRef<CodeEditorHandle>(null);
 
   useEffect(() => {
@@ -46,6 +52,30 @@ export default function App() {
 
   const preamble = buildPreamble(wb.objects);
 
+  function isDirtySinceEvaluated(): boolean {
+    if (!lastEvaluatedState) {
+      return code.trim().length > 0 || wb.objects.length > 0;
+    }
+    return (
+      JSON.stringify(lastEvaluatedState.objects) !== JSON.stringify(wb.objects) ||
+      lastEvaluatedState.code !== code
+    );
+  }
+
+  function loadEntry(entry: Calculation) {
+    if (isDirtySinceEvaluated()) {
+      const ok = window.confirm('Discard current edits and load this entry?');
+      if (!ok) return;
+    }
+    wb.replaceAll(entry.objects);
+    setCode(entry.code);
+    setOutputs(entry.outputs);
+    setEvalError(null);
+    setLastEvaluatedState({ objects: entry.objects, code: entry.code });
+    persist.saveImmediate({ objects: entry.objects, code: entry.code, outputs: entry.outputs });
+    setHistoryOpen(false);
+  }
+
   async function runCode() {
     if (!code.trim()) {
       setOutputs([]);
@@ -60,6 +90,12 @@ export default function App() {
       const outs = await runOnSage(full);
       setOutputs(outs);
       persist.saveImmediate({ objects: wb.objects, code, outputs: outs });
+      setLastEvaluatedState({ objects: wb.objects, code });
+      if (auth.status === 'authenticated') {
+        saveHistory({ code, objects: wb.objects, outputs: outs }).catch((err) => {
+          console.warn('saveHistory failed', err);
+        });
+      }
     } catch (err) {
       setEvalError((err as Error).message ?? String(err));
     } finally {
@@ -89,6 +125,9 @@ export default function App() {
             ) : auth.status === 'anonymous' ? (
               <button className="account-btn" onClick={() => setLoginOpen(true)}>Sign in</button>
             ) : null}
+            {auth.status === 'authenticated' && (
+              <button className="account-btn" onClick={() => setHistoryOpen(true)}>History</button>
+            )}
           </span>
         </header>
         <div className="double-rule" />
@@ -196,6 +235,11 @@ export default function App() {
         </footer>
       </div>
       <LoginModal open={loginOpen} onClose={() => setLoginOpen(false)} />
+      <HistoryModal
+        open={historyOpen}
+        onClose={() => setHistoryOpen(false)}
+        onLoad={loadEntry}
+      />
     </>
   );
 }
