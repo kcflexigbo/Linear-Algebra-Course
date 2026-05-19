@@ -27,4 +27,6 @@ export interface Calculation {
   objects: WorkbenchObject[];
   outputs: SageOutput[];
   preview: string;
+  public: boolean;
+  slug: string | null;
 }

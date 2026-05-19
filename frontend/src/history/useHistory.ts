@@ -1,6 +1,6 @@
 import { useEffect, useState, useCallback } from 'react';
 import { bb } from '../lib/butterbaseClient';
-import { renameCalculation } from '../api';
+import { renameCalculation, toggleShare } from '../api';
 import type { Calculation } from '../types';
 
 export function useHistory(enabled: boolean) {
@@ -77,5 +77,18 @@ export function useHistory(enabled: boolean) {
     );
   }
 
-  return { entries, loading, error, deleteEntry, clearAll, rename, refetch: fetchAll };
+  async function setShared(id: string, isPublic: boolean): Promise<Calculation | null> {
+    const res = await toggleShare(id, isPublic);
+    let updated: Calculation | null = null;
+    setEntries((prev) =>
+      prev.map((e) => {
+        if (e.id !== id) return e;
+        updated = { ...e, public: res.public, slug: res.slug || null };
+        return updated;
+      }),
+    );
+    return updated;
+  }
+
+  return { entries, loading, error, deleteEntry, clearAll, rename, setShared, refetch: fetchAll };
 }

@@ -66,3 +66,24 @@ export async function saveHistory(payload: {
 export async function renameCalculation(id: string, title: string): Promise<void> {
   await authFetch('/rename_calculation', { id, title });
 }
+
+export async function toggleShare(
+  id: string,
+  isPublic: boolean,
+): Promise<{ public: boolean; slug: string }> {
+  const data = (await authFetch('/toggle_share', { id, public: isPublic })) as {
+    public: boolean;
+    slug: string;
+  };
+  return data;
+}
+
+export async function fetchSharedCalculation(slug: string): Promise<import('./types').Calculation | null> {
+  const { data, error } = await bb
+    .from<import('./types').Calculation>('calculations')
+    .select('*')
+    .eq('slug', slug)
+    .limit(1);
+  if (error) throw new Error(error.message ?? 'Failed to load shared calculation');
+  return (data?.[0] as import('./types').Calculation | undefined) ?? null;
+}

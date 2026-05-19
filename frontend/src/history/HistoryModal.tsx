@@ -56,6 +56,7 @@ export function HistoryModal({ open, onClose, onLoad }: Props) {
               onLoad={onLoad}
               onDelete={history.deleteEntry}
               onRename={history.rename}
+              onSetShared={history.setShared}
             />
           ))}
         </ul>

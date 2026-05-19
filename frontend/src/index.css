@@ -547,3 +547,98 @@ code {
 .history-rename-form { flex: 1; display: flex; gap: 4px; align-items: center; }
 .history-rename-form input { flex: 1; padding: 4px 6px; font-family: var(--mono); font-size: 13px; border: 1px solid var(--rule); }
 .history-rename-form button { font-family: var(--serif); font-size: 13px; padding: 4px 10px; background: none; border: 1px solid var(--rule); cursor: pointer; }
+
+/* ── Shared view ──────────────────────────────────────────────── */
+.shared-body { padding-top: 16px; }
+.shared-title {
+  font-family: var(--serif); font-size: 28px; font-weight: 600;
+  margin: 0 0 4px;
+}
+.shared-meta {
+  font-family: var(--serif); font-style: italic; color: var(--ink-faint);
+  font-size: 13px; margin: 0 0 24px;
+}
+.shared-section { margin-bottom: 28px; }
+.shared-obj-grid {
+  display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, max-content));
+  gap: 18px; margin-top: 12px;
+}
+.shared-obj {
+  font-family: var(--mono); font-size: 13px;
+}
+.shared-obj-name {
+  font-family: var(--serif); font-weight: 600; font-size: 15px;
+  margin-bottom: 6px;
+}
+.shared-obj-kind {
+  font-style: italic; font-weight: 400; color: var(--ink-soft);
+  font-size: 12px;
+}
+.shared-matrix {
+  border-collapse: collapse;
+  border-left: 1.5px solid var(--ink);
+  border-right: 1.5px solid var(--ink);
+}
+.shared-matrix td {
+  padding: 2px 10px; text-align: right; min-width: 28px;
+}
+.shared-scalar { font-size: 16px; }
+.shared-code {
+  font-family: var(--mono); font-size: 13px;
+  background: rgba(0,0,0,0.04);
+  padding: 12px 14px;
+  border-left: 2px solid var(--ink-soft);
+  margin: 12px 0 0;
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+/* ── Share panel inside history entry ─────────────────────────── */
+.history-entry { flex-wrap: wrap; }
+.history-share {
+  flex-basis: 100%;
+  margin-top: 6px; padding: 8px 4px 0;
+  border-top: 1px dashed var(--rule);
+  display: flex; flex-direction: column; gap: 6px;
+  font-family: var(--serif); font-size: 13px;
+}
+.history-share-row { display: flex; gap: 6px; align-items: center; }
+.history-share-row input {
+  flex: 1; font-family: var(--mono); font-size: 12px;
+  padding: 4px 6px; border: 1px solid var(--rule); background: #fff;
+}
+.history-share-row button,
+.history-share-actions button {
+  font-family: var(--serif); font-size: 12px;
+  background: none; border: 1px solid var(--rule);
+  padding: 4px 10px; cursor: pointer;
+}
+.history-share-actions { display: flex; gap: 6px; align-items: center; flex-wrap: wrap; }
+.history-share-note { color: var(--ink-soft); font-style: italic; flex: 1; }
+.history-action-shared { color: var(--accent, #6b3); }
+
+/* ── One-click ops bar ────────────────────────────────────────── */
+.opsbar {
+  display: flex; flex-wrap: wrap; align-items: center; gap: 6px 8px;
+  padding: 8px 10px;
+  border: 1px solid var(--rule);
+  border-bottom: none;
+  background: rgba(0,0,0,0.02);
+  font-family: var(--serif); font-size: 13px;
+}
+.opsbar-label { color: var(--ink-soft); font-style: italic; }
+.opsbar-select {
+  font-family: var(--mono); font-size: 13px;
+  padding: 2px 6px;
+  border: 1px solid var(--rule);
+  background: #fff;
+}
+.opsbar-divider { color: var(--ink-faint); }
+.opsbar-btn {
+  font-family: var(--mono); font-size: 12px;
+  padding: 2px 8px;
+  border: 1px solid var(--rule);
+  background: #fff;
+  cursor: pointer;
+}
+.opsbar-btn:hover { border-color: var(--ink); background: rgba(0,0,0,0.04); }

@@ -39,6 +39,18 @@
         "auth": "required"
       },
       "timeoutMs": 5000
+    },
+    {
+      "name": "toggle_share",
+      "source": "functions/toggle_share.ts",
+      "url": "https://api.butterbase.ai/v1/app_02vcbf6ev0vp/fn/toggle_share",
+      "trigger": {
+        "type": "http",
+        "method": "POST",
+        "path": "/toggle_share",
+        "auth": "required"
+      },
+      "timeoutMs": 5000
     }
   ],
   "cors": {

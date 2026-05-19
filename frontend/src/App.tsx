@@ -3,6 +3,7 @@ import { useWorkbench, buildPreamble } from './hooks/useWorkbench';
 import { useLocalWorkbench } from './persistence/useLocalWorkbench';
 import { ObjectCard } from './components/ObjectCard';
 import { SnippetBar } from './components/SnippetBar';
+import { OpsBar } from './components/OpsBar';
 import { OutputPanel } from './components/OutputPanel';
 import { CodeEditor, type CodeEditorHandle } from './components/CodeEditor';
 import { runOnSage, saveHistory } from './api';
@@ -188,6 +189,7 @@ export default function App() {
             </div>
 
             <div className="editor-wrap">
+              <OpsBar objects={wb.objects} onInsert={insertSnippet} />
               <SnippetBar onInsert={insertSnippet} />
 
               <CodeEditor
