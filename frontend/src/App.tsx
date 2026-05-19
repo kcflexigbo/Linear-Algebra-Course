@@ -1,25 +1,44 @@
 import { useEffect, useRef, useState } from 'react';
 import { useWorkbench, buildPreamble } from './hooks/useWorkbench';
+import { useLocalWorkbench } from './persistence/useLocalWorkbench';
 import { ObjectCard } from './components/ObjectCard';
 import { SnippetBar } from './components/SnippetBar';
 import { OutputPanel } from './components/OutputPanel';
+import { CodeEditor, type CodeEditorHandle } from './components/CodeEditor';
 import { runOnSage } from './api';
 import type { ObjKind, SageOutput } from './types';
 import 'katex/dist/katex.min.css';
 
 export default function App() {
   const wb = useWorkbench();
+  const persist = useLocalWorkbench();
   const [code, setCode] = useState('show(A.rref())');
   const [showPreamble, setShowPreamble] = useState(false);
   const [loading, setLoading] = useState(false);
   const [outputs, setOutputs] = useState<SageOutput[] | null>(null);
   const [evalError, setEvalError] = useState<string | null>(null);
-  const codeRef = useRef<HTMLTextAreaElement>(null);
+  const [restored, setRestored] = useState(false);
+  const editorRef = useRef<CodeEditorHandle>(null);
 
   useEffect(() => {
-    wb.initExample();
+    const snap = persist.restore();
+    if (snap) {
+      wb.replaceAll(snap.objects);
+      setCode(snap.code);
+      setOutputs(snap.outputs ?? null);
+    } else {
+      wb.initExample();
+    }
+    setRestored(true);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  // Debounced persistence of edits.
+  useEffect(() => {
+    if (!restored) return;
+    persist.save({ objects: wb.objects, code, outputs });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [wb.objects, code, restored]);
 
   const preamble = buildPreamble(wb.objects);
 
@@ -36,6 +55,7 @@ export default function App() {
     try {
       const outs = await runOnSage(full);
       setOutputs(outs);
+      persist.saveImmediate({ objects: wb.objects, code, outputs: outs });
     } catch (err) {
       setEvalError((err as Error).message ?? String(err));
     } finally {
@@ -43,24 +63,8 @@ export default function App() {
     }
   }
 
-  function handleKeyDown(e: React.KeyboardEvent) {
-    if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') {
-      e.preventDefault();
-      runCode();
-    }
-  }
-
   function insertSnippet(snip: string) {
-    const ta = codeRef.current;
-    if (!ta) return;
-    const start = ta.selectionStart;
-    const end = ta.selectionEnd;
-    const next = code.slice(0, start) + snip + code.slice(end);
-    setCode(next);
-    requestAnimationFrame(() => {
-      ta.focus();
-      ta.selectionStart = ta.selectionEnd = start + snip.length;
-    });
+    editorRef.current?.insert(snip);
   }
 
   return (
@@ -133,14 +137,13 @@ export default function App() {
             <div className="editor-wrap">
               <SnippetBar onInsert={insertSnippet} />
 
-              <textarea
-                ref={codeRef}
-                id="code"
-                spellCheck={false}
-                placeholder={`# Write Sage code here using the names you defined to the left.\n# Examples:\n#   show(A.rref())\n#   show(A * B)\n#   show(A.eigenvalues())`}
+              <CodeEditor
+                ref={editorRef}
                 value={code}
-                onChange={(e) => setCode(e.target.value)}
-                onKeyDown={handleKeyDown}
+                onChange={setCode}
+                onRun={runCode}
+                objects={wb.objects}
+                placeholder={`# Write Sage code here using the names you defined to the left.\n# Examples:\n#   show(A.rref())\n#   show(A * B)\n#   show(A.eigenvalues())`}
               />
 
               <div className="editor-foot">

@@ -146,6 +146,12 @@ export function useWorkbench() {
     );
   }, []);
 
+  const replaceAll = useCallback((next: WorkbenchObject[]) => {
+    usedNames.current = new Set(next.map((o) => o.name));
+    nextId.current = next.reduce((m, o) => Math.max(m, o.id + 1), 0);
+    setObjects(next);
+  }, []);
+
   const initExample = useCallback(() => {
     const id = nextId.current++;
     usedNames.current.add('A');
@@ -179,5 +185,6 @@ export function useWorkbench() {
     updateCell,
     updateScalar,
     initExample,
+    replaceAll,
   };
 }
