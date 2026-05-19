@@ -6,12 +6,16 @@ import { SnippetBar } from './components/SnippetBar';
 import { OutputPanel } from './components/OutputPanel';
 import { CodeEditor, type CodeEditorHandle } from './components/CodeEditor';
 import { runOnSage } from './api';
+import { useAuth } from './auth/AuthContext';
+import { LoginModal } from './auth/LoginModal';
 import type { ObjKind, SageOutput } from './types';
 import 'katex/dist/katex.min.css';
 
 export default function App() {
   const wb = useWorkbench();
   const persist = useLocalWorkbench();
+  const auth = useAuth();
+  const [loginOpen, setLoginOpen] = useState(false);
   const [code, setCode] = useState('show(A.rref())');
   const [showPreamble, setShowPreamble] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -76,6 +80,16 @@ export default function App() {
             <span className="subtitle">— a Sage-powered reading desk for matrices, vectors &amp; the operations between them</span>
           </div>
           <span className="vol">Vol. I · No. 1</span>
+          <span className="account">
+            {auth.status === 'authenticated' && auth.user ? (
+              <>
+                <span className="account-email">{auth.user.email}</span>
+                <button className="account-btn" onClick={() => auth.signOut()}>Sign out</button>
+              </>
+            ) : auth.status === 'anonymous' ? (
+              <button className="account-btn" onClick={() => setLoginOpen(true)}>Sign in</button>
+            ) : null}
+          </span>
         </header>
         <div className="double-rule" />
 
@@ -181,6 +195,7 @@ export default function App() {
           <span>Set in EB Garamond &amp; JetBrains Mono.</span>
         </footer>
       </div>
+      <LoginModal open={loginOpen} onClose={() => setLoginOpen(false)} />
     </>
   );
 }
