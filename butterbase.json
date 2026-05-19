@@ -27,6 +27,18 @@
         "auth": "required"
       },
       "timeoutMs": 10000
+    },
+    {
+      "name": "rename_calculation",
+      "source": "functions/rename_calculation.ts",
+      "url": "https://api.butterbase.ai/v1/app_02vcbf6ev0vp/fn/rename_calculation",
+      "trigger": {
+        "type": "http",
+        "method": "POST",
+        "path": "/rename_calculation",
+        "auth": "required"
+      },
+      "timeoutMs": 5000
     }
   ],
   "cors": {
