@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
-import { useWorkbench, buildPreamble } from './hooks/useWorkbench';
+import { useWorkbench, buildPreamble, preambleRingLabel } from './hooks/useWorkbench';
 import { useLocalWorkbench } from './persistence/useLocalWorkbench';
 import { ObjectCard } from './components/ObjectCard';
 import { SnippetBar } from './components/SnippetBar';
@@ -10,6 +10,8 @@ import { runOnSage, saveHistory } from './api';
 import { useAuth } from './auth/AuthContext';
 import { LoginModal } from './auth/LoginModal';
 import { HistoryModal } from './history/HistoryModal';
+import { AIUploadModal } from './ai/AIUploadModal';
+import { AIPromptModal } from './ai/AIPromptModal';
 import type { ObjKind, SageOutput, WorkbenchObject, Calculation } from './types';
 import 'katex/dist/katex.min.css';
 
@@ -19,6 +21,8 @@ export default function App() {
   const auth = useAuth();
   const [loginOpen, setLoginOpen] = useState(false);
   const [historyOpen, setHistoryOpen] = useState(false);
+  const [aiOpen, setAiOpen] = useState(false);
+  const [aiPromptOpen, setAiPromptOpen] = useState(false);
   const [code, setCode] = useState('show(A.rref())');
   const [showPreamble, setShowPreamble] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -52,6 +56,7 @@ export default function App() {
   }, [wb.objects, code, restored]);
 
   const preamble = buildPreamble(wb.objects);
+  const ringLabel = preambleRingLabel(wb.objects);
 
   function isDirtySinceEvaluated(): boolean {
     if (!lastEvaluatedState) {
@@ -167,6 +172,9 @@ export default function App() {
                   <span className="plus">+</span>{kind}
                 </button>
               ))}
+              <button className="add-btn" onClick={() => setAiOpen(true)}>
+                <span className="plus">+</span>from image
+              </button>
             </div>
 
             <div style={{ marginTop: 32 }}>
@@ -185,7 +193,7 @@ export default function App() {
           <section>
             <div className="section-h">
               <span>Computation</span>
-              <span className="count">Sage · QQ ring</span>
+              <span className="count">Sage · {ringLabel} ring</span>
             </div>
 
             <div className="editor-wrap">
@@ -205,13 +213,18 @@ export default function App() {
                 <button className="preamble-toggle" onClick={() => setShowPreamble((v) => !v)}>
                   {showPreamble ? 'hide' : 'view'} generated preamble
                 </button>
-                <button className="run-btn" disabled={loading} onClick={runCode}>
-                  {loading ? (
-                    <><span className="spinner" /><span>Evaluating</span></>
-                  ) : (
-                    <><span>Evaluate</span><span className="arrow">→</span></>
-                  )}
-                </button>
+                <div style={{ display: 'flex', gap: 0, alignItems: 'center' }}>
+                  <button className="ai-ask-btn" onClick={() => setAiPromptOpen(true)}>
+                    ask AI
+                  </button>
+                  <button className="run-btn" disabled={loading} onClick={runCode}>
+                    {loading ? (
+                      <><span className="spinner" /><span>Evaluating</span></>
+                    ) : (
+                      <><span>Evaluate</span><span className="arrow">→</span></>
+                    )}
+                  </button>
+                </div>
               </div>
 
               {showPreamble && (
@@ -241,6 +254,26 @@ export default function App() {
         open={historyOpen}
         onClose={() => setHistoryOpen(false)}
         onLoad={loadEntry}
+      />
+      <AIUploadModal
+        open={aiOpen}
+        onClose={() => setAiOpen(false)}
+        prevObjects={wb.objects}
+        prevCode={code}
+        onApply={(next) => {
+          wb.replaceAll(next.objects);
+          setCode(next.code);
+        }}
+      />
+      <AIPromptModal
+        open={aiPromptOpen}
+        onClose={() => setAiPromptOpen(false)}
+        prevObjects={wb.objects}
+        prevCode={code}
+        onApply={(next) => {
+          wb.replaceAll(next.objects);
+          setCode(next.code);
+        }}
       />
     </>
   );

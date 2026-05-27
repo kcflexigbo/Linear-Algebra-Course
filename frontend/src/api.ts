@@ -5,6 +5,32 @@ const API_BASE = bb.apiUrl + '/v1/' + bb.appId;
 
 const EVALUATE_URL =
   import.meta.env.VITE_EVALUATE_URL ?? `${API_BASE}/fn/evaluate`;
+const AI_WORKBENCH_URL =
+  import.meta.env.VITE_AI_WORKBENCH_URL ?? `${API_BASE}/fn/ai_workbench`;
+
+export interface AiWorkbenchRequest {
+  image?: string;
+  instruction: string;
+  context?: { objects: WorkbenchObject[]; code: string };
+}
+
+export async function aiWorkbench(req: AiWorkbenchRequest): Promise<unknown[]> {
+  const resp = await fetch(AI_WORKBENCH_URL, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(req),
+  });
+  let data: { ok: boolean; tool_calls?: unknown[]; error?: string };
+  try {
+    data = await resp.json();
+  } catch {
+    throw new Error(`ai_workbench failed: ${resp.status} (non-JSON)`);
+  }
+  if (!resp.ok || !data.ok) {
+    throw new Error(data.error ?? `ai_workbench failed: ${resp.status}`);
+  }
+  return data.tool_calls ?? [];
+}
 
 export async function runOnSage(code: string): Promise<SageOutput[]> {
   const resp = await fetch(EVALUATE_URL, {

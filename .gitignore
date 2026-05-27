@@ -11,3 +11,5 @@ frontend/node_modules/
 *.env
 frontend/.env.local
 frontend/.env.*.local
+.playwright*
+*docs*

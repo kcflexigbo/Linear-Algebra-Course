@@ -505,6 +505,43 @@ code {
 .modal-actions button:disabled { opacity: 0.5; cursor: not-allowed; }
 .modal .error { color: #a33; font-style: italic; }
 
+/* ── AI upload modal ──────────────────────────────────────────── */
+.modal-ai { max-width: 560px; width: 92%; }
+.ai-dropzone {
+  border: 1px dashed var(--rule); padding: 24px; text-align: center;
+  cursor: pointer; margin: 8px 0; min-height: 100px;
+  display: flex; align-items: center; justify-content: center;
+  color: #777; font-size: 13px;
+}
+.ai-dropzone img { max-width: 100%; max-height: 240px; display: block; }
+.ai-clear-img {
+  font-family: var(--serif); font-size: 12px; background: none;
+  border: none; color: #a33; cursor: pointer; padding: 0; margin-bottom: 8px;
+}
+.ai-instruction {
+  width: 100%; box-sizing: border-box; font-family: var(--mono, monospace);
+  font-size: 13px; padding: 8px; border: 1px solid var(--rule); resize: vertical;
+  margin: 4px 0 8px;
+}
+.ai-solve { display: flex; align-items: center; gap: 6px; font-size: 13px; margin: 4px 0 12px; }
+.ai-preview {
+  border-top: 1px solid var(--rule); margin-top: 12px; padding-top: 10px; font-size: 13px;
+}
+.ai-preview ul { margin: 6px 0 0 18px; padding: 0; }
+.ai-preview li { margin: 2px 0; }
+.ai-warn { color: #a33; font-style: italic; margin-top: 6px; }
+.modal-ai-prompt { max-width: 520px; width: 92%; }
+.modal-ai-prompt kbd {
+  font-family: var(--mono, monospace); font-size: 11px;
+  border: 1px solid var(--rule); padding: 0 4px; border-radius: 2px; background: #f8f5ec;
+}
+.ai-ask-btn {
+  font-family: var(--serif); font-size: 14px; font-style: italic;
+  background: none; border: 1px solid var(--rule); padding: 6px 14px;
+  cursor: pointer; margin-right: 8px;
+}
+.ai-ask-btn:hover { border-color: var(--ink); }
+
 /* ── History modal ────────────────────────────────────────────── */
 .modal-history { max-width: 640px; width: 90%; }
 .modal-header {

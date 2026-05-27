@@ -10,7 +10,7 @@ interface Props {
 }
 
 function shareUrl(slug: string): string {
-  return `${window.location.origin}/c/${slug}`;
+  return `${window.location.origin}/?c=${slug}`;
 }
 
 function relativeTime(iso: string): string {

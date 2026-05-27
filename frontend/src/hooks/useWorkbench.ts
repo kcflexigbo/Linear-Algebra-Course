@@ -22,23 +22,97 @@ export function sanitizeEntry(v: string | undefined): string {
   return s.replace(/[−–—]/g, '-');
 }
 
+const SAGE_RESERVED = new Set([
+  'pi', 'e', 'I', 'oo', 'infinity', 'NaN',
+  'True', 'False', 'None',
+  'sin', 'cos', 'tan', 'cot', 'sec', 'csc',
+  'asin', 'acos', 'atan', 'acot', 'asec', 'acsc',
+  'sinh', 'cosh', 'tanh', 'asinh', 'acosh', 'atanh',
+  'exp', 'log', 'ln', 'sqrt', 'abs', 'factorial', 'gamma',
+  'real', 'imag', 'conjugate', 'floor', 'ceil', 'round',
+  'min', 'max', 'sum', 'prod',
+  'QQ', 'ZZ', 'RR', 'CC', 'SR', 'RDF', 'CDF', 'GF', 'AA', 'QQbar',
+  'PolynomialRing', 'var', 'matrix', 'vector',
+  'identity_matrix', 'zero_matrix', 'diagonal_matrix',
+  'show', 'print', 'latex',
+]);
+
+export function freeSymbolsIn(entries: string[], objectNames: Set<string>): string[] {
+  const found = new Set<string>();
+  const idRe = /[A-Za-z_]\w*/g;
+  for (const entry of entries) {
+    let m: RegExpExecArray | null;
+    while ((m = idRe.exec(entry)) !== null) {
+      const tok = m[0];
+      if (objectNames.has(tok)) continue;
+      if (SAGE_RESERVED.has(tok)) continue;
+      // Skip if immediately preceded by '.' (method/attribute access)
+      if (m.index > 0 && entry[m.index - 1] === '.') continue;
+      // Skip if it looks like a numeric literal suffix (unlikely given regex, but guard)
+      found.add(tok);
+    }
+  }
+  return Array.from(found).sort();
+}
+
 export function buildPreamble(objects: WorkbenchObject[]): string {
-  return objects
-    .map((obj) => {
-      if (obj.kind === 'scalar') {
-        return `${obj.name} = ${sanitizeEntry(obj.values['0,0'])}`;
-      }
-      const entries: string[] = [];
+  const objectNames = new Set(objects.map((o) => o.name));
+  const allEntries: string[] = [];
+  for (const obj of objects) {
+    if (obj.kind === 'scalar') {
+      allEntries.push(sanitizeEntry(obj.values['0,0']));
+    } else {
       for (let r = 0; r < obj.rows; r++)
         for (let c = 0; c < obj.cols; c++)
-          entries.push(sanitizeEntry(obj.values[`${r},${c}`]));
-      const entryStr = entries.join(', ');
-      if (obj.kind === 'vector') {
-        return `${obj.name} = vector(QQ, [${entryStr}])`;
-      }
-      return `${obj.name} = matrix(QQ, ${obj.rows}, ${obj.cols}, [${entryStr}])`;
-    })
-    .join('\n');
+          allEntries.push(sanitizeEntry(obj.values[`${r},${c}`]));
+    }
+  }
+  const symbols = freeSymbolsIn(allEntries, objectNames);
+  const hasSymbols = symbols.length > 0;
+
+  const lines: string[] = [];
+  if (hasSymbols) lines.push(`var('${symbols.join(' ')}')`);
+
+  for (const obj of objects) {
+    if (obj.kind === 'scalar') {
+      lines.push(`${obj.name} = ${sanitizeEntry(obj.values['0,0'])}`);
+      continue;
+    }
+    const entries: string[] = [];
+    for (let r = 0; r < obj.rows; r++)
+      for (let c = 0; c < obj.cols; c++)
+        entries.push(sanitizeEntry(obj.values[`${r},${c}`]));
+    const entryStr = entries.join(', ');
+    if (obj.kind === 'vector') {
+      lines.push(
+        hasSymbols
+          ? `${obj.name} = vector([${entryStr}])`
+          : `${obj.name} = vector(QQ, [${entryStr}])`
+      );
+    } else {
+      lines.push(
+        hasSymbols
+          ? `${obj.name} = matrix(${obj.rows}, ${obj.cols}, [${entryStr}])`
+          : `${obj.name} = matrix(QQ, ${obj.rows}, ${obj.cols}, [${entryStr}])`
+      );
+    }
+  }
+  return lines.join('\n');
+}
+
+export function preambleRingLabel(objects: WorkbenchObject[]): 'QQ' | 'SR' {
+  const objectNames = new Set(objects.map((o) => o.name));
+  const allEntries: string[] = [];
+  for (const obj of objects) {
+    if (obj.kind === 'scalar') {
+      allEntries.push(sanitizeEntry(obj.values['0,0']));
+    } else {
+      for (let r = 0; r < obj.rows; r++)
+        for (let c = 0; c < obj.cols; c++)
+          allEntries.push(sanitizeEntry(obj.values[`${r},${c}`]));
+    }
+  }
+  return freeSymbolsIn(allEntries, objectNames).length > 0 ? 'SR' : 'QQ';
 }
 
 export function useWorkbench() {
